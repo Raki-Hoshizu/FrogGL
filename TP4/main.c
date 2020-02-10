@@ -1,4 +1,4 @@
-// gcc main.c actions.o axes.o init.o lumiere.o switch_blend.o  switch_light.o VM_init.o -lm -lGL -lGLU -lglut -o test
+// gcc main.c actions.c axes.c init.c lumiere.c switch_blend.c switch_light.c VM_init.c -lm -lGL -lGLU -lglut -o test.out
 
 #include "init.h"
 #include "axes.h"
