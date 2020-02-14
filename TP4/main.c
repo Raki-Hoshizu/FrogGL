@@ -54,7 +54,7 @@ GLvoid Modelisation()
     glutSwapBuffers();
 
     anglePyramid += 0.2f;
-    //xrot -= anglePyramid;
+    xrot += anglePyramid;
 }
 
 int main(int argc, char **argv) 
