@@ -4,6 +4,9 @@
 #include "camera/freecam.h"
 #include "meshes/plane.h"
 
+#include <ctime>
+#include <cstdlib>
+
 // path variables
 // --------------
 std::string srcPath = "/home/rakl/Repository/Image-Synthesis/frogGL/src/";
@@ -38,6 +41,7 @@ float lastFrame = 0.0f;
 
 int main(int argc, char **argv)
 {
+	srand(time(NULL));
 	// initialize glfw
 	// ---------------
 	GLFWwindow* window = init();
@@ -61,23 +65,23 @@ int main(int argc, char **argv)
 		glm::vec3(-4.0f, -0.2f,  2.0f), glm::vec3(-2.0f, -0.2f,  2.0f), glm::vec3( 0.0f, -0.2f,  2.0f), glm::vec3( 2.0f, -0.2f,  2.0f), glm::vec3( 4.0f, -0.2f,  2.0f),
 		glm::vec3(-4.0f, -0.2f,  4.0f), glm::vec3(-2.0f, -0.2f,  4.0f), glm::vec3( 0.0f, -0.2f,  4.0f), glm::vec3( 2.0f, -0.2f,  4.0f), glm::vec3( 4.0f, -0.2f,  4.0f)
 	};
-	glm::vec3 cubePositions[] = {
-		glm::vec3( 0.0f,  2.0f,  0.0f), glm::vec3( 2.0f, 7.0f, -15.0f), glm::vec3(-1.5f,  6.2f, -2.5f), glm::vec3(-3.8f, 2.0f, -12.3f), glm::vec3( 2.4f,  4.4f, -3.5f),
-		glm::vec3(-1.7f,  5.0f, -7.5f), glm::vec3( 3.0f, 4.0f, -2.5f),  glm::vec3( 1.5f,  4.0f, -5.5f), glm::vec3( 1.5f,  2.2f, -1.5f), glm::vec3(-1.3f,  3.0f, -1.5f)
-	};
+
+	std::vector<glm::vec3> cubePositions;
+	for (int i = 0; i < 10; ++i)
+	{ cubePositions.push_back(glm::vec3( rand()%9-4.0f, rand()%6+3.0f, rand()%9-4.0f)); }
 
     // adding our textures
     // -------------------------
     Texture texture(texturesPath);
     texture.add("frog.png");	// texture.id[0]
-    for (int i = 1; i <= 10; ++i) 	// texture.id[1->10]
+    texture.add("grass.jpg");	// texture.id[1]
+    texture.add("container.jpg");	// texture.id[2]
+    for (int i = 1; i <= 13; ++i)	// texture.id[3->15]
     {
-    	std::string name = "grass"+std::to_string(i)+".jpg";
-    	texture.add(name);
+    	std::string name = "gear"+std::to_string(i)+".png";
+    	texture.add(name, GL_RGBA, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
     }
-    bool rev = false;
-    texture.add("container.jpg");	// texture.id[11]
-    texture.add("gear.png", GL_RGBA);	// texture.id[12]
+    int gearFrame = 1;
 	
 	// tell OpenGL for each sampler to which texture unit it belongs to
 	// -------------------------------------------------------------------------------------------
@@ -116,19 +120,20 @@ int main(int argc, char **argv)
 		ourShader.setMat4("view", view);
 
 		// draw ground
-		int id = (int)currentFrame%10 + 1;
 		for (unsigned int i = 0; i < nbPlane; ++i)
 		{
 			glm::vec4 rotation = glm::vec4(1.0f, 0.0f, 0.0f, 90.0f);
-			plane.draw(planePositions[i], rotation, 1, &ourShader, &texture, id);
+			plane.draw(planePositions[i], rotation, 1, &ourShader, &texture, 1);
 		}
 
 		// draw flying cubes
 		for (unsigned int i = 0; i < 10; ++i)
 		{
 			glm::vec4 rotation = glm::vec4(sin(i), 0.3f, 0.2f, 20.0f*glfwGetTime());
-			cube.draw(cubePositions[i], rotation, 2, &ourShader, &texture, 11, 12, 0.4f);
+			cube.draw(cubePositions[i], rotation, 2, &ourShader, &texture, 2, gearFrame+2, 0.6f);
 		}
+		gearFrame++;
+		if (gearFrame > 13) { gearFrame = 1; }
 
 		// checking if the frog is inside the playground, otherwise move it to it's previous position
 		if(checkOOB(frog.Position)) { frog.Position = glm::vec3(frog.prevPosition.x, frog.Position.y, frog.prevPosition.z); }
