@@ -29,8 +29,7 @@ Plane::Plane(unsigned int xSegments, unsigned int ySegments)
 			Indices.push_back((y+1) * (xSegments+1) + x + 1);
 		}
 	}
-
-	Topology = TRIANGLE_STRIP;
+    
 	Finalize();
 }
 

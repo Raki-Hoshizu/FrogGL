@@ -7,16 +7,6 @@
 
 #include <vector>
 
-enum TOPOLOGY
-{
-	POINTS,
-	LINES,
-	LINE_STRIP,
-	TRIANGLES,
-	TRIANGLE_STRIP,
-	TRIANGLE_FAN
-};
-
 class Mesh
 {
 public:
@@ -28,12 +18,11 @@ public:
 	std::vector<glm::vec2> UV;
 	std::vector<glm::vec3> Normals;
 
-	TOPOLOGY Topology = TRIANGLES;
 	std::vector<unsigned int> Indices;
 
 	Mesh();
 
-	void Finalize(bool interleaved = true);
+	void Finalize();
 };
 
 #endif

@@ -5,7 +5,7 @@ Mesh::Mesh()
 
 }
 
-void Mesh::Finalize(bool interleaved)
+void Mesh::Finalize()
 {
 	// initiialize object IDs if not configured before
 	if (!m_VAO)
@@ -17,42 +17,19 @@ void Mesh::Finalize(bool interleaved)
 
 	// preprocess buffer data as interleaved or separate when specified
 	std::vector<float> data;
-	if (interleaved)
-	{
-		for (int i = 0; i < Positions.size(); ++i)
-		{
-			data.push_back(Positions[i].x);
-			data.push_back(Positions[i].y);
-			data.push_back(Positions[i].z);
 
-			if(UV.size() > 0)
-			{
-				data.push_back(UV[i].x);
-				data.push_back(UV[i].y);
-			}
-			if(Normals.size() > 0)
-			{
-				data.push_back(Normals[i].x);
-				data.push_back(Normals[i].y);
-				data.push_back(Normals[i].z);
-			}
-		}
-	}
-	else
+	for (int i = 0; i < Positions.size(); ++i)
 	{
-		// if any of the float arrays are empty, data won't be filled by them
-		for (int i = 0; i < Positions.size(); ++i)
-		{
-			data.push_back(Positions[i].x);
-			data.push_back(Positions[i].y);
-			data.push_back(Positions[i].z);
-		}
-		for (int i = 0; i < Positions.size(); ++i)
+		data.push_back(Positions[i].x);
+		data.push_back(Positions[i].y);
+		data.push_back(Positions[i].z);
+
+		if(UV.size() > 0)
 		{
 			data.push_back(UV[i].x);
 			data.push_back(UV[i].y);
 		}
-		for (int i = 0; i < Positions.size(); ++i)
+		if(Normals.size() > 0)
 		{
 			data.push_back(Normals[i].x);
 			data.push_back(Normals[i].y);
@@ -70,47 +47,27 @@ void Mesh::Finalize(bool interleaved)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(unsigned int), &Indices[0], GL_STATIC_DRAW);
 	}
-	if (interleaved)
-	{
-		size_t stride					= 3 * sizeof(float);
-		if (UV.size() > 0)		stride += 2 * sizeof(float);
-		if (Normals.size() > 0) stride += 3 * sizeof(float);
 
-		size_t offset = 0;
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)offset);
-		offset += 3 * sizeof(float);
+	size_t stride					= 3 * sizeof(float);
+	if (UV.size() > 0)		stride += 2 * sizeof(float);
+	if (Normals.size() > 0) stride += 3 * sizeof(float);
 
-		if (UV.size() > 0)
-		{
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)offset);
-			offset += 2 * sizeof(float);
-		}
-		if (Normals.size() > 0)
-		{
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)offset);
-		}
-	}
-	else
+	size_t offset = 0;
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)offset);
+	offset += 3 * sizeof(float);
+
+	if (UV.size() > 0)
 	{
-		size_t offset = 0;
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)offset);
-		offset += Positions.size() * sizeof(float);
-		if (UV.size() > 0)
-		{
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)offset);
-			offset += UV.size() * sizeof(float); 
-		}
-		if (Normals.size() > 0)
-		{
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)offset);
-			offset += Normals.size() * sizeof(float);
-		}
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (GLvoid*)offset);
+		offset += 2 * sizeof(float);
 	}
+	if (Normals.size() > 0)
+	{
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (GLvoid*)offset);
+	}
+
 	glBindVertexArray(0);
 }
