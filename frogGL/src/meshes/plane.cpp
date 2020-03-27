@@ -33,10 +33,10 @@ Plane::Plane(unsigned int xSegments, unsigned int ySegments)
 	Finalize();
 }
 
-void Plane::draw(glm::vec3 pos, glm::vec4 rot, int nbTex, Shader* shader, Texture* textures, int tex1, int tex2, float opacity, glm::vec4 color)
+void Plane::draw(glm::vec3 pos, glm::vec4 rot, MODE mode, Shader* shader, Texture* textures, int tex1, int tex2, float opacity, glm::vec4 color)
 {
     int planeSize = (Positions.size() + UV.size() + Normals.size()) * sizeof(float);
-    if (nbTex == 2)
+    if (mode == MODE_TEX2)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textures->id[tex1]);
@@ -45,13 +45,13 @@ void Plane::draw(glm::vec3 pos, glm::vec4 rot, int nbTex, Shader* shader, Textur
         shader->setBool("drawTex2", true);
         shader->setFloat("opacity", opacity);
     }
-    else if (nbTex == 1)
+    else if (mode == MODE_TEX1)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textures->id[tex1]);
         shader->setBool("drawTex1", true);
     }
-    else if (nbTex == 0)
+    else if (mode == MODE_COLOR)
     {
         shader->setBool("color", true);
         shader->setVec4("ourColor", color);
@@ -67,9 +67,9 @@ void Plane::draw(glm::vec3 pos, glm::vec4 rot, int nbTex, Shader* shader, Textur
     shader->setMat4("model", model);
     glDrawElements(GL_TRIANGLES, planeSize, GL_UNSIGNED_INT, 0);
 
-    if (nbTex == 2) { shader->setBool("drawTex2", false); }
-    else if (nbTex == 1) { shader->setBool("drawTex1", false); }
-    else if (nbTex == 0) { shader->setBool("color", false); }
+    if (mode == MODE_TEX2) { shader->setBool("drawTex2", false); }
+    else if (mode == MODE_TEX1) { shader->setBool("drawTex1", false); }
+    else if (mode == MODE_COLOR) { shader->setBool("color", false); }
 
     glBindVertexArray(0);
 

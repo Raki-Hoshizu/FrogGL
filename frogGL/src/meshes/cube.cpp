@@ -136,10 +136,10 @@ Cube::Cube()
     Finalize();
 }
 
-void Cube::draw(glm::vec3 pos, glm::vec4 rot, int nbTex, Shader* shader, Texture* textures, int tex1, int tex2, float opacity, glm::vec4 color)
+void Cube::draw(glm::vec3 pos, glm::vec4 rot, MODE mode, Shader* shader, Texture* textures, int tex1, int tex2, float opacity, glm::vec4 color)
 {
     int cubeSize = Positions.size();
-    if (nbTex == 2)
+    if (mode == MODE_TEX2)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textures->id[tex1]);
@@ -148,13 +148,13 @@ void Cube::draw(glm::vec3 pos, glm::vec4 rot, int nbTex, Shader* shader, Texture
         shader->setBool("drawTex2", true);
         shader->setFloat("opacity", opacity);
     }
-    else if (nbTex == 1)
+    else if (mode == MODE_TEX1)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textures->id[tex1]);
         shader->setBool("drawTex1", true);
     }
-    else if (nbTex == 0)
+    else if (mode == MODE_COLOR)
     {
         shader->setBool("color", true);
         shader->setVec4("ourColor", color);
@@ -170,9 +170,9 @@ void Cube::draw(glm::vec3 pos, glm::vec4 rot, int nbTex, Shader* shader, Texture
     shader->setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, cubeSize);
 
-    if (nbTex == 2) { shader->setBool("drawTex2", false); }
-    else if (nbTex == 1) { shader->setBool("drawTex1", false); }
-    else if (nbTex == 0) { shader->setBool("color", false); }
+    if (mode == MODE_TEX2) { shader->setBool("drawTex2", false); }
+    else if (mode == MODE_TEX1) { shader->setBool("drawTex1", false); }
+    else if (mode == MODE_COLOR) { shader->setBool("color", false); }
 
     glBindVertexArray(0);
 

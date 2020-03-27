@@ -26,10 +26,11 @@ Frog frogBot(glm::vec3(0.0f, 0.0f, 3.0f));
 
 // camera variables
 // ----------------
-Freecam freecam(glm::vec3(0.0f, 2.0f, 3.0f));
+Freecam freecam(glm::vec3(0.0f, 7.0f, 10.0f));
 // starting in freecam
 Camera* currentCamera = &freecam;
 bool freeMode = true;
+// variables used to manipulate camera with mouse
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -41,7 +42,7 @@ float lastFrame = 0.0f;
 
 int main(int argc, char **argv)
 {
-	srand(time(NULL));
+	srand(time(NULL)); // initializing rand seed with current time
 	// initialize glfw
 	// ---------------
 	GLFWwindow* window = init();
@@ -52,12 +53,11 @@ int main(int argc, char **argv)
 
 	// set up objects and vertex positions
 	// ------------------------------------------------------------------
-	Plane plane(100, 100); // glfw needs to be initialized first, because Plane and Cube have Buffers and Array objects
-	Cube cube;
-	// frogs
-	frog.setShader(&ourShader);
-	frogBot.setShader(&ourShader);
-	// world space positions
+	Plane plane(100, 100); // creates a plane with 100 x-segments and 100 y-segments
+	Cube cube; // used for the flying cubes
+	Cube lamp;
+	// world space plane positions
+	// the ground is made of 25 planes, so the texture won't be too stretched
 	glm::vec3 planePositions[] = {
 		glm::vec3(-4.0f, -0.2f, -4.0f), glm::vec3(-2.0f, -0.2f, -4.0f), glm::vec3( 0.0f, -0.2f, -4.0f), glm::vec3( 2.0f, -0.2f, -4.0f), glm::vec3( 4.0f, -0.2f, -4.0f),
 		glm::vec3(-4.0f, -0.2f, -2.0f), glm::vec3(-2.0f, -0.2f, -2.0f), glm::vec3( 0.0f, -0.2f, -2.0f), glm::vec3( 2.0f, -0.2f, -2.0f), glm::vec3( 4.0f, -0.2f, -2.0f),
@@ -65,10 +65,14 @@ int main(int argc, char **argv)
 		glm::vec3(-4.0f, -0.2f,  2.0f), glm::vec3(-2.0f, -0.2f,  2.0f), glm::vec3( 0.0f, -0.2f,  2.0f), glm::vec3( 2.0f, -0.2f,  2.0f), glm::vec3( 4.0f, -0.2f,  2.0f),
 		glm::vec3(-4.0f, -0.2f,  4.0f), glm::vec3(-2.0f, -0.2f,  4.0f), glm::vec3( 0.0f, -0.2f,  4.0f), glm::vec3( 2.0f, -0.2f,  4.0f), glm::vec3( 4.0f, -0.2f,  4.0f)
 	};
-
+	// world space cube positions
 	std::vector<glm::vec3> cubePositions;
 	for (int i = 0; i < 10; ++i)
-	{ cubePositions.push_back(glm::vec3( rand()%9-4.0f, rand()%6+3.0f, rand()%9-4.0f)); }
+	{ cubePositions.push_back(glm::vec3( rand()%9-4.0f, rand()%6+3.0f, rand()%9-4.0f)); } // between (-4.0f, 3.0f, -4.0f) and (4.0f, 8.0f, 4.0f)
+	// lighting practice
+	glm::vec3 lightPos(3.0f, 3.0f, 7.0f);
+	cubePositions.push_back(lightPos);
+	cubePositions.push_back(glm::vec3(3.0f, 2.0f, 9.0f));
 
     // adding our textures
     // -------------------------
@@ -81,13 +85,15 @@ int main(int argc, char **argv)
     	std::string name = "gear"+std::to_string(i)+".png";
     	texture.add(name, GL_RGBA, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
     }
-    int gearFrame = 1;
+    int gearFrame = 1; // initializing the first gear animation frame
 	
 	// tell OpenGL for each sampler to which texture unit it belongs to
 	// -------------------------------------------------------------------------------------------
 	ourShader.use();
 	ourShader.setInt("texture1", 0);
 	ourShader.setInt("texture2", 1);
+
+	ourShader.setVec4("lightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	// render loop
 	// -----------
@@ -123,23 +129,28 @@ int main(int argc, char **argv)
 		for (unsigned int i = 0; i < nbPlane; ++i)
 		{
 			glm::vec4 rotation = glm::vec4(1.0f, 0.0f, 0.0f, 90.0f);
-			plane.draw(planePositions[i], rotation, 1, &ourShader, &texture, 1);
+			plane.draw(planePositions[i], rotation, MODE_TEX1, &ourShader, &texture, 1);
 		}
 
 		// draw flying cubes
 		for (unsigned int i = 0; i < 10; ++i)
 		{
 			glm::vec4 rotation = glm::vec4(sin(i), 0.3f, 0.2f, 20.0f*glfwGetTime());
-			cube.draw(cubePositions[i], rotation, 2, &ourShader, &texture, 2, gearFrame+2, 0.6f);
+			cube.draw(cubePositions[i], rotation, MODE_TEX2, &ourShader, &texture, 2, gearFrame+2, 0.6f);
 		}
 		gearFrame++;
 		if (gearFrame > 13) { gearFrame = 1; }
 
+		// draw lighting cube
+		glm::vec4 rotation = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		lamp.draw(cubePositions[10], rotation, MODE_NONE, &ourShader);
+		lamp.draw(cubePositions[11], rotation, MODE_COLOR, &ourShader, NULL, 0, 0, 0.0f, glm::vec4(1.0f, 0.5f, 0.31f, 1.0f));
+
 		// checking if the frog is inside the playground, otherwise move it to it's previous position
 		if(checkOOB(frog.Position)) { frog.Position = glm::vec3(frog.prevPosition.x, frog.Position.y, frog.prevPosition.z); }
-		frog.draw(texture.id[0], glm::vec4(1.0f, 0.72f, 0.54f, 1.0f));
+		frog.draw(&ourShader, &texture, 0);
 
-		frogBot.draw(texture.id[0], glm::vec4(1.0f, 0.72f, 0.54f, 1.0f));
+		frogBot.draw(&ourShader, &texture, 0);
 
 		// frogBot movement pattern
 		// ------------------------
@@ -253,6 +264,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	freecam.ProcessMouseScroll(yoffset);
 }
 
+// checks if the given pos is outsine the playground
+// -------------------------------------------------
 bool checkOOB(glm::vec3 pos)
 {
 	if (pos.x+0.1f >= maxPlane || pos.x-0.1f <= minPlane) return true;

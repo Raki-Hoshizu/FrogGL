@@ -12,7 +12,7 @@ public:
 
 	void draw(	glm::vec3 pos 		= glm::vec3(0.0f, 0.0f, 0.0f),
 				glm::vec4 rot		= glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
-				int nbTex			= 0,
+				MODE mode			= MODE_NONE,
 				Shader* shader 		= NULL,
 				Texture* textures 	= NULL,
 				int tex1			= 0,

@@ -28,9 +28,8 @@ class Frog
 {
 public:
 	Frog(glm::vec3 start);
-	void setShader(Shader* shader);
 
-	void draw(int texture, glm::vec4 color);
+	void draw(Shader *shader, Texture *texture, int texID = 0);
 	void jump();
 	void reset();
 	void updateRotation();
@@ -39,24 +38,22 @@ public:
 
 	float Yaw = 0.0f;
 	float Pitch = 0.0f;
-	glm::vec3 Position;
-	glm::vec3 prevPosition;
-	glm::vec3 Direction;
+	glm::vec3 Position; // actual position of the frog
+	glm::vec3 prevPosition; // previous position of the frog
+	glm::vec3 Direction; // the direction vector, pointing to where the frog is looking at
 
-	std::vector<glm::vec3> ElementsPos;
-	std::vector<glm::vec4> ElementsRot;
-	std::vector<glm::vec3> ElementsSca;
-	std::vector<shapeType> ElementsType;
+	std::vector<glm::vec3> ElementsPos; // Vector of it's element positions
+	std::vector<glm::vec4> ElementsRot; // Vector of it's element rotations
+	std::vector<glm::vec3> ElementsSca; // Vector of it's element scales
+	std::vector<shapeType> ElementsType; // Vector if it's element types
 
-	Shader* ourShader;
 	bool jumping = false;
 	float jumpAngle = 180.0f;
 
 private:
 
-	void drawElement(int i, texType t, int texture, glm::vec4 color);
+	void drawElement(int i, texType t, Shader *shader, int texture = 0, glm::vec4 color = glm::vec4(1.0f));
 
-	std::vector<glm::vec3> jumpPositions;
 };
 
 #endif

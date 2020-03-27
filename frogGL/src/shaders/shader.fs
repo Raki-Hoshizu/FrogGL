@@ -10,6 +10,8 @@ uniform bool drawTex1;
 uniform bool color;
 
 uniform vec4 ourColor;
+uniform vec4 lightColor;
+
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform float opacity;
@@ -25,8 +27,8 @@ void main()
 		FragColor = texture(texture1, TexCoord);
 	// Apply a color
 	else if (color)
-		FragColor = ourColor;
+		FragColor = lightColor*ourColor;
 	// Default color is black
 	else
-		FragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
